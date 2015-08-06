@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ public class Thesaurus {
 	private Map<String, List<String>> map;
 	
 	private Thesaurus() {
+		map = new HashMap<>();
 		try {
 			BufferedReader buf = new BufferedReader(new InputStreamReader(Thesaurus.class.getResourceAsStream("mthesaur.txt"), "UTF-8"));
 			for(String line = buf.readLine(); line != null; line = buf.readLine()) {
