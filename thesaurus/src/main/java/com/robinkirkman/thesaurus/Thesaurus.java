@@ -31,19 +31,21 @@ public class Thesaurus {
 			long idx = 0;
 			long count = 0;
 			StringBuilder sb = new StringBuilder();
+			boolean nl = true;
 			for(int b = in.read(); b >= 0; b = in.read()) {
 				boolean dump = false;
 				char c = (char) b;
 				if(c == '\n') {
-					dump = true;
 					idx = count+1;
+					nl = true;
+					sb = new StringBuilder();
 				} else if(c == ',')
 					dump = true;
 				else if(c != '\r')
 					sb.append(c);
-				if(dump) {
+				if(dump && nl) {
 					map.put(sb.toString(), idx);
-					sb = new StringBuilder();
+					nl = false;
 				}
 				count++;
 			}
