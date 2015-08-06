@@ -28,7 +28,13 @@ public class Thesaurus {
 			for(String line = buf.readLine(); line != null; line = buf.readLine()) {
 				List<String> group = Collections.unmodifiableList(Arrays.asList(line.split(",")));
 				for(String word : group) {
-					map.put(word, group);
+					if(!map.containsKey(word))
+						map.put(word, group);
+					else {
+						List<String> wgroup = new ArrayList<>(map.get(word));
+						wgroup.addAll(group);
+						map.put(word, Collections.unmodifiableList(wgroup));
+					}
 				}
 			}
 		} catch(IOException e) {
