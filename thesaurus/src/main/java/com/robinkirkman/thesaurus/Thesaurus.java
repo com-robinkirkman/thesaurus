@@ -21,22 +21,18 @@ public class Thesaurus {
 		return instance;
 	}
 
-	private Map<String, List<String>> map;
+	private Map<String, String> map;
 	
 	private Thesaurus() {
 		map = new HashMap<>();
 		try {
 			BufferedReader buf = new BufferedReader(new InputStreamReader(Thesaurus.class.getResourceAsStream("mthesaur.txt"), "UTF-8"));
 			for(String line = buf.readLine(); line != null; line = buf.readLine()) {
-				List<String> group = Collections.unmodifiableList(Arrays.asList(line.split(",")));
-				for(String word : group) {
+				for(String word : line.split(",")) {
 					if(!map.containsKey(word))
-						map.put(word, group);
-					else {
-						List<String> wgroup = new ArrayList<>(map.get(word));
-						wgroup.addAll(group);
-						map.put(word, Collections.unmodifiableList(wgroup));
-					}
+						map.put(word, line);
+					else
+						map.put(word, map.get(word) + "," + line);
 				}
 			}
 		} catch(IOException e) {
@@ -45,6 +41,9 @@ public class Thesaurus {
 	}
 	
 	public List<String> get(String word) {
-		return map.get(word);
+		String line = map.get(word);
+		if(line == null)
+			return null;
+		return Arrays.asList(line.split(","));
 	}
 }
