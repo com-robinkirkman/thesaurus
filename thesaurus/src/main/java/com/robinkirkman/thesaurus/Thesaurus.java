@@ -2,6 +2,7 @@ package com.robinkirkman.thesaurus;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -21,29 +22,61 @@ public class Thesaurus {
 		return instance;
 	}
 
-	private Map<String, String> map;
+	private Map<String, Long> map;
 	
 	private Thesaurus() {
 		map = new HashMap<>();
+		InputStream in = Thesaurus.class.getResourceAsStream("mthesaur.txt");
 		try {
-			BufferedReader buf = new BufferedReader(new InputStreamReader(Thesaurus.class.getResourceAsStream("mthesaur.txt"), "UTF-8"));
-			for(String line = buf.readLine(); line != null; line = buf.readLine()) {
-				for(String word : line.split(",")) {
-					if(!map.containsKey(word))
-						map.put(word, line);
-					else
-						map.put(word, map.get(word) + "," + line);
+			long idx = 0;
+			long count = 0;
+			StringBuilder sb = new StringBuilder();
+			for(int b = in.read(); b >= 0; b = in.read()) {
+				boolean dump = false;
+				char c = (char) b;
+				if(c == '\n') {
+					dump = true;
+					idx = count+1;
+				} else if(c == ',')
+					dump = true;
+				else if(c != '\r')
+					sb.append(c);
+				if(dump) {
+					map.put(sb.toString(), idx);
+					sb = new StringBuilder();
 				}
+				count++;
 			}
+			in.close();
 		} catch(IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
 	public List<String> get(String word) {
-		String line = map.get(word);
-		if(line == null)
+		if(!map.containsKey(word))
 			return null;
-		return Arrays.asList(line.split(","));
+		InputStream in = Thesaurus.class.getResourceAsStream("mthesaur.txt");
+		try {
+			in.skip(map.get(word));
+			StringBuilder sb = new StringBuilder();
+			List<String> syn = new ArrayList<>();
+			for(int b = in.read(); b >= 0; b = in.read()) {
+				char c = (char) b;
+				if(c == '\n')
+					break;
+				if(c == ',') {
+					syn.add(sb.toString());
+					sb = new StringBuilder();
+				} else if(c != '\r')
+					sb.append(c);
+			}
+			if(sb.length() > 0)
+				syn.add(sb.toString());
+			in.close();
+			return syn;
+		} catch(IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
